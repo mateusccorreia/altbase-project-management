@@ -1,5 +1,5 @@
 # Deploy automático para GitHub Pages
-name: Deploy to GitHub Pages
+name: Deploy React App
 
 on:
   push:
