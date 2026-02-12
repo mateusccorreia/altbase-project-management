@@ -1,66 +1,73 @@
-# Altbase - Dashboard de Gestão de Projetos
+# React + TypeScript + Vite
 
-Dashboard de acompanhamento de projetos de Grandes Reparos, conectado à lista SharePoint "Base-Projetos-Grandes-Reparos".
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-## 🏗️ Arquitetura
+Currently, two official plugins are available:
 
-```
-MPP Files (MS Project)
-    ↓ Power Automate
-SharePoint List ("Base-Projetos-Grandes-Reparos")
-    ↓ REST API / PnPjs
-React Dashboard (este app)
-```
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
-## 📋 Campos da Lista SharePoint
+## React Compiler
 
-| Campo | Tipo | Descrição |
-|-------|------|-----------|
-| Título | Texto | Nome do projeto |
-| Coordenador do Projeto | Texto | Responsável |
-| Status | Escolha | Não Iniciado, Em Andamento, Concluído, Atrasado, Pausado |
-| Dt. de Início | Data | Data de início do projeto |
-| Dt. de Término | Data | Data de término prevista |
-| Progresso (%) | Número | Percentual de conclusão (0-100) |
-| Custo Orçado | Moeda | Valor orçado para o projeto |
-| Custo Realizado | Moeda | Valor efetivamente gasto |
-| Comentários | Texto (múltiplas linhas) | Observações e atualizações |
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
 
-## 🔄 Power Automate - Fluxo MPP → SharePoint
+## Expanding the ESLint configuration
 
-### Configuração do Fluxo
+If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
 
-1. **Trigger**: Quando um arquivo é criado/modificado na pasta de projetos MPP
-2. **Ação**: Converter MPP → extrair dados das tarefas de resumo
-3. **Ação**: Criar/atualizar item na lista "Base-Projetos-Grandes-Reparos"
+```js
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
 
-> **Nota**: O MS Project (MPP) não tem conector nativo no Power Automate. 
-> A abordagem recomendada é:
-> - Salvar o arquivo MPP em uma pasta do SharePoint/OneDrive
-> - Usar um script Office (Excel/Project Online) ou API customizada para extrair os dados
-> - Atualizar a lista via ação "Create Item" ou "Update Item" do SharePoint
+      // Remove tseslint.configs.recommended and replace with this
+      tseslint.configs.recommendedTypeChecked,
+      // Alternatively, use this for stricter rules
+      tseslint.configs.strictTypeChecked,
+      // Optionally, add this for stylistic rules
+      tseslint.configs.stylisticTypeChecked,
 
-## 🚀 Como Rodar
-
-```bash
-npm install
-npm run dev
+      // Other configs...
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
 ```
 
-## 🔌 Conectar ao SharePoint
+You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
 
-1. Edite `src/services/sp.ts` e configure:
-   - `SHAREPOINT_SITE_URL` com a URL do seu site
-   - `LIST_NAME` já está configurada como "Base-Projetos-Grandes-Reparos"
+```js
+// eslint.config.js
+import reactX from 'eslint-plugin-react-x'
+import reactDom from 'eslint-plugin-react-dom'
 
-2. Verifique os nomes internos dos campos em `src/types/index.ts` (constante `SP_FIELD_MAP`)
-
-3. Em `src/App.tsx`, substitua `mockProjects` pela chamada `fetchProjectsFromSP()`
-
-## 🛠️ Stack
-
-- React 19 + TypeScript
-- Vite
-- Tailwind CSS v4
-- Lucide Icons
-- PnPjs (SharePoint integration)
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
+      // Enable lint rules for React
+      reactX.configs['recommended-typescript'],
+      // Enable lint rules for React DOM
+      reactDom.configs.recommended,
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
+```

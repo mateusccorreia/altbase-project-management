@@ -1,45 +1,44 @@
 import React from 'react';
-import { Activity, Menu } from 'lucide-react';
+import { Bell, Search, Settings, HelpCircle } from 'lucide-react';
 
-interface HeaderProps {
-    onToggleSidebar?: () => void;
-}
-
-export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
-    const now = new Date();
-    const greeting = now.getHours() < 12 ? 'Bom dia' : now.getHours() < 18 ? 'Boa tarde' : 'Boa noite';
-    const dateStr = new Intl.DateTimeFormat('pt-BR', {
-        weekday: 'long',
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-    }).format(now);
-
+export const Header: React.FC = () => {
     return (
-        <header className="h-16 glass flex items-center justify-between px-6 sticky top-0 z-50">
-            <div className="flex items-center gap-3">
-                <button
-                    onClick={onToggleSidebar}
-                    className="md:hidden p-2 rounded-lg hover:bg-surface-elevated transition-colors text-text-secondary"
-                >
-                    <Menu size={20} />
-                </button>
-                <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-primary-light flex items-center justify-center shadow-lg">
-                        <Activity size={18} className="text-white" />
-                    </div>
-                    <div>
-                        <h1 className="text-lg font-bold text-text-primary leading-tight">
-                            Grandes Reparos
-                        </h1>
-                        <p className="text-xs text-text-muted hidden sm:block">Dashboard de Acompanhamento</p>
-                    </div>
+        <header className="h-16 border-b border-gray-200 bg-white flex items-center justify-between px-6 shadow-sm sticky top-0 z-50">
+            {/* Left */}
+            <div className="flex items-center">
+                <div className="w-8 h-8 rounded-md bg-monday-blue flex items-center justify-center text-white font-bold text-lg mr-3">
+                    M
                 </div>
+                <h1 className="text-xl font-bold text-monday-dark">Project Strategic Dashboard</h1>
             </div>
 
-            <div className="text-right">
-                <p className="text-sm font-medium text-text-primary">{greeting}!</p>
-                <p className="text-xs text-text-muted capitalize">{dateStr}</p>
+            {/* Middle */}
+            <div className="flex-1 max-w-xl mx-8 relative">
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                    <Search size={18} />
+                </div>
+                <input
+                    type="text"
+                    placeholder="Search items, projects, people..."
+                    className="w-full h-10 pl-10 pr-4 rounded-full bg-monday-bg border border-transparent focus:bg-white focus:border-monday-blue focus:outline-none transition-colors text-sm"
+                />
+            </div>
+
+            {/* Right */}
+            <div className="flex items-center space-x-4 text-gray-500">
+                <button className="hover:bg-gray-100 p-2 rounded-full transition-colors relative">
+                    <Bell size={20} />
+                    <span className="absolute top-1 right-1 w-2 h-2 bg-monday-red rounded-full border-2 border-white"></span>
+                </button>
+                <button className="hover:bg-gray-100 p-2 rounded-full transition-colors">
+                    <Settings size={20} />
+                </button>
+                <button className="hover:bg-gray-100 p-2 rounded-full transition-colors">
+                    <HelpCircle size={20} />
+                </button>
+                <div className="w-8 h-8 rounded-full bg-monday-purple flex items-center justify-center text-white text-xs font-bold border-2 border-white cursor-pointer shadow-sm">
+                    JS
+                </div>
             </div>
         </header>
     );

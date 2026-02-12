@@ -1,26 +1,38 @@
-// Maps to SharePoint list "Base-Projetos-Grandes-Reparos"
+export type Status =
+    | 'Concluído' | 'Em Andamento' | 'Atrasado' | 'Pausado' | 'Não Iniciado' // Português
+    | 'Done' | 'Working on it' | 'Stuck' | 'Not Started'; // Inglês (usado no mockData)
+
 export interface Project {
-    id: number;
-    title: string;            // Título
-    coordinator: string;      // Coordenador do Projeto
-    status: ProjectStatus;    // Status
-    startDate: string;        // Dt. de Início (ISO)
-    endDate: string;          // Dt. de Término (ISO)
-    progress: number;         // Progresso (%) 0-100
-    budgetCost: number;       // Custo Orçado
-    actualCost: number;       // Custo Realizado
-    comments: string;         // Comentários
+    id: string;
+    title: string;
+    coordinator: string;
+    status: Status;
+    priority: 'High' | 'Medium' | 'Low' | 'Alto' | 'Médio' | 'Baixo'; // Mix de EN/PT para compatibilidade
+    startDate: string;      // ISO Date string
+    endDate: string;        // ISO Date string
+    progress: number;       // 0-100
+    budgetCost: number;     // Orçamento planejado
+    actualCost: number;     // Custo real até agora
+    description?: string;
 }
 
-export type ProjectStatus =
-    | 'Não Iniciado'
-    | 'Em Andamento'
-    | 'Concluído'
-    | 'Atrasado'
-    | 'Pausado'
-    | 'Verde'    // Mapped in UI
-    | 'Vermelho' // Mapped in UI
-    | 'Amarelo'; // Mapped in UI
+export interface ProjectTask {
+    id: string;
+    title: string;
+    owner: string;
+    status: Status;
+    priority: 'High' | 'Medium' | 'Low';
+    timelineStart: string; // ISO Date
+    timelineEnd: string;   // ISO Date
+    progress: number;      // 0-100
+}
+
+export interface ProjectGroup {
+    id: string;
+    title: string;
+    color: string;
+    tasks: ProjectTask[];
+}
 
 export interface DashboardStats {
     totalProjects: number;
@@ -31,16 +43,3 @@ export interface DashboardStats {
     totalBudget: number;
     totalActualCost: number;
 }
-
-// SharePoint field mappings (guesses based on standard encoding)
-export const SP_FIELD_MAP = {
-    title: 'Title',
-    coordinator: 'Coordenador_x0020_do_x0020_Projeto',
-    status: 'Status',
-    startDate: 'Dt_x002e__x0020_de_x0020_In_x00ed_cio', // "Dt. de Início"
-    endDate: 'Dt_x002e__x0020_de_x0020_T_x00e9_rmino',   // "Dt. de Término"
-    progress: 'Progresso', // Often simplified, or 'Progresso_x0020__x0028__x0025__x0029_'
-    budgetCost: 'Custo_x0020_Or_x00e7_ado',
-    actualCost: 'Custo_x0020_Realizado',
-    comments: 'Coment_x00e1_rios',
-} as const;

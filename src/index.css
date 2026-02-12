@@ -1,55 +1,20 @@
 @import "tailwindcss";
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
 
 @theme {
-  /* AMP Palette */
-  --color-amp-orange: #F58746;
-  /* LARANJA */
-  --color-amp-lilac: #BE2878;
-  /* LILÁS */
-  --color-amp-red: #E63C46;
-  /* VERMELHO */
-  --color-amp-orange-light: #FFBE6E;
-  /* LARANJA CLARO (Fixed hex) */
-  --color-amp-lilac-light: #F3E5F5;
-  /* LILÁS 2 (Approx) */
-  --color-amp-orange-2: #FC7053;
-  /* LARANJA 2 */
+  --color-monday-green: #00C875;
+  --color-monday-red: #E2445C;
+  --color-monday-yellow: #FDAB3D;
+  --color-monday-blue: #579BFC;
+  --color-monday-purple: #A25DDC;
+  --color-monday-dark: #323338;
+  --color-monday-bg: #F5F6F8;
+  --color-monday-border: #D0D4E4;
+  --color-monday-hover: #e6e9ef;
 
-  /* Semantic mappings */
-  --color-primary: var(--color-amp-orange);
-  --color-primary-dark: var(--color-amp-red);
-  --color-primary-light: var(--color-amp-orange-2);
-
-  /* Status colors - Functional Patterns (Reverted) */
-  --color-status-complete: #10B981;
-  /* Green */
-  --color-status-progress: #3B82F6;
-  /* Blue */
-  --color-status-delayed: #EF4444;
-  /* Red */
-  --color-status-paused: #F59E0B;
-  /* Amber */
-  --color-status-notstarted: #6B7280;
-  /* Slate */
-
-  /* Dark theme surfaces (Unchanged) */
-  --color-surface-dark: #0F172A;
-  --color-surface-card: #1E293B;
-  --color-surface-card-hover: #273548;
-  --color-surface-elevated: #334155;
-  --color-border-subtle: #334155;
-  --color-text-primary: #F1F5F9;
-  --color-text-secondary: #94A3B8;
-  --color-text-muted: #64748B;
-
-  /* Animations (Unchanged) */
   --animate-fade-in: fadeIn 0.5s ease-out;
-  --animate-slide-up: slideUp 0.4s ease-out;
-  --animate-slide-right: slideRight 0.4s ease-out;
-  --animate-scale-in: scaleIn 0.3s ease-out;
-  --animate-pulse-glow: pulseGlow 2s ease-in-out infinite;
+  --animate-slide-up: slideUp 0.5s ease-out;
 
   @keyframes fadeIn {
     0% {
@@ -63,7 +28,7 @@
 
   @keyframes slideUp {
     0% {
-      transform: translateY(20px);
+      transform: translateY(10px);
       opacity: 0;
     }
 
@@ -72,146 +37,22 @@
       opacity: 1;
     }
   }
-
-  @keyframes slideRight {
-    0% {
-      transform: translateX(-20px);
-      opacity: 0;
-    }
-
-    100% {
-      transform: translateX(0);
-      opacity: 1;
-    }
-  }
-
-  @keyframes scaleIn {
-    0% {
-      transform: scale(0.9);
-      opacity: 0;
-    }
-
-    100% {
-      transform: scale(1);
-      opacity: 1;
-    }
-  }
-
-  @keyframes pulseGlow {
-
-    0%,
-    100% {
-      box-shadow: 0 0 5px rgba(245, 135, 70, 0.2);
-    }
-
-    50% {
-      box-shadow: 0 0 20px rgba(245, 135, 70, 0.4);
-    }
-  }
-}
-
-* {
-  box-sizing: border-box;
 }
 
 body {
-  font-family: 'Inter', sans-serif;
-  background-color: var(--color-surface-dark);
+  font-family: 'Roboto', sans-serif;
+  background-color: #F8F9FA;
   margin: 0;
   padding: 0;
-  color: var(--color-text-primary);
+  color: #323338;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Scrollbar styling */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+.monday-cell {
+  @apply h-10 px-4 text-sm flex items-center border-b border-gray-200 overflow-hidden text-ellipsis whitespace-nowrap;
 }
 
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--color-border-subtle);
-  border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-text-muted);
-}
-
-/* Glass effect utility */
-.glass {
-  background: rgba(30, 41, 59, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(51, 65, 85, 0.5);
-}
-
-/* Progress bar animation */
-.progress-bar-fill {
-  transition: width 1s ease-in-out;
-}
-
-/* Stat card hover */
-.stat-card {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.stat-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.3);
-}
-
-/* Table row hover */
-.project-row {
-  transition: all 0.2s ease;
-}
-
-.project-row:hover {
-  background: var(--color-surface-card-hover);
-}
-
-/* Stagger animation */
-.stagger-1 {
-  animation-delay: 0.05s;
-}
-
-.stagger-2 {
-  animation-delay: 0.1s;
-}
-
-.stagger-3 {
-  animation-delay: 0.15s;
-}
-
-.stagger-4 {
-  animation-delay: 0.2s;
-}
-
-.stagger-5 {
-  animation-delay: 0.25s;
-}
-
-.stagger-6 {
-  animation-delay: 0.3s;
-}
-
-.stagger-7 {
-  animation-delay: 0.35s;
-}
-
-.stagger-8 {
-  animation-delay: 0.4s;
-}
-
-.stagger-9 {
-  animation-delay: 0.45s;
-}
-
-.stagger-10 {
-  animation-delay: 0.5s;
+.monday-header {
+  @apply h-10 px-4 text-xs font-semibold text-gray-500 uppercase flex items-center border-b border-gray-300 bg-gray-50 select-none;
 }
