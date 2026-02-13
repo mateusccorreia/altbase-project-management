@@ -1,0 +1,40 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
+  "solution": {
+    "name": "altbase-project-management-client-side-solution",
+    "id": "3a029b81-1dde-4e3f-a6f0-fc7fce0127df",
+    "version": "1.0.0.0",
+    "includeClientSideAssets": true,
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "developer": {
+      "name": "",
+      "websiteUrl": "",
+      "privacyUrl": "",
+      "termsOfUseUrl": "",
+      "mpnId": "Undefined-1.22.2"
+    },
+    "metadata": {
+      "shortDescription": {
+        "default": "altbase-project-management description"
+      },
+      "longDescription": {
+        "default": "altbase-project-management description"
+      },
+      "screenshotPaths": [],
+      "videoUrl": "",
+      "categories": []
+    },
+    "features": [
+      {
+        "title": "altbase-project-management Feature",
+        "description": "The feature that activates elements of the altbase-project-management solution.",
+        "id": "6850bb63-a5b2-46fb-9974-6346055b2b00",
+        "version": "1.0.0.0"
+      }
+    ]
+  },
+  "paths": {
+    "zippedPackage": "solution/altbase-project-management.sppkg"
+  }
+}

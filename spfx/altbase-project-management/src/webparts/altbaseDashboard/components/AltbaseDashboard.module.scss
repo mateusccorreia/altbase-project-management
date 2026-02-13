@@ -1,0 +1,984 @@
+// AMP Design Tokens
+$amp-orange: #F58746;
+$amp-red: #E63C46;
+$amp-orange-light: #FC7053;
+
+$primary: $amp-orange;
+$primary-dark: $amp-red;
+$primary-light: $amp-orange-light;
+
+// Status colors
+$status-complete: #10B981;
+$status-progress: #3B82F6;
+$status-delayed: #EF4444;
+$status-paused: #F59E0B;
+$status-notstarted: #6B7280;
+
+// Dark theme surfaces
+$surface-dark: #0F172A;
+$surface-card: #1E293B;
+$surface-card-hover: #273548;
+$surface-elevated: #334155;
+$border-subtle: #334155;
+$text-primary: #F1F5F9;
+$text-secondary: #94A3B8;
+$text-muted: #64748B;
+
+// =============================
+// Animations
+// =============================
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  0% {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideRight {
+  0% {
+    transform: translateX(-20px);
+    opacity: 0;
+  }
+
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
+}
+
+// =============================
+// Root container
+// =============================
+.altbaseDashboard {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  background-color: $surface-dark;
+  color: $text-primary;
+  box-sizing: border-box;
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  // Scrollbar
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: $border-subtle;
+    border-radius: 3px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: $text-muted;
+  }
+}
+
+// =============================
+// Sidebar
+// =============================
+.sidebar {
+  width: 256px;
+  background: $surface-card;
+  border-right: 1px solid $border-subtle;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.sidebarLogo {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  border-bottom: 1px solid $border-subtle;
+}
+
+.logoIcon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, $primary, $primary-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 700;
+  font-size: 14px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+}
+
+.logoText {
+  font-weight: 700;
+  font-size: 18px;
+  color: $text-primary;
+  letter-spacing: -0.025em;
+  margin-left: 10px;
+}
+
+.sidebarNav {
+  flex: 1;
+  padding: 16px;
+
+  .sectionLabel {
+    font-size: 11px;
+    font-weight: 600;
+    color: $text-muted;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 12px;
+    padding: 0 12px;
+  }
+}
+
+.navItem {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: none;
+  color: $text-secondary;
+  margin-bottom: 4px;
+
+  &:hover {
+    background: $surface-elevated;
+    color: $text-primary;
+  }
+
+  &.active {
+    background: rgba($primary, 0.1);
+    color: $primary;
+    border-color: rgba($primary, 0.2);
+  }
+}
+
+.sidebarBottom {
+  padding: 16px;
+  border-top: 1px solid $border-subtle;
+}
+
+.syncCard {
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba($primary, 0.1), rgba($primary-dark, 0.05));
+  border: 1px solid rgba($primary, 0.15);
+  padding: 16px;
+  margin-top: 16px;
+
+  .syncTitle {
+    font-size: 12px;
+    font-weight: 600;
+    color: $primary;
+    margin-bottom: 4px;
+  }
+
+  .syncDesc {
+    font-size: 12px;
+    color: $text-muted;
+    line-height: 1.5;
+  }
+
+  .syncStatus {
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: $status-complete;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    .dotText {
+      font-size: 12px;
+      color: $status-complete;
+      font-weight: 500;
+    }
+  }
+}
+
+// =============================
+// Header
+// =============================
+.header {
+  height: 64px;
+  background: rgba($surface-card, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba($border-subtle, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.headerIcon {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, $primary, $primary-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+  color: white;
+}
+
+.headerTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: $text-primary;
+  line-height: 1.2;
+}
+
+.headerSub {
+  font-size: 12px;
+  color: $text-muted;
+}
+
+.headerRight {
+  text-align: right;
+
+  .greeting {
+    font-size: 14px;
+    font-weight: 500;
+    color: $text-primary;
+  }
+
+  .dateStr {
+    font-size: 12px;
+    color: $text-muted;
+    text-transform: capitalize;
+  }
+}
+
+// =============================
+// Main content
+// =============================
+.mainContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.mainBody {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.mainInner {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 24px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+// =============================
+// Loading
+// =============================
+.loadingContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 60vh;
+  text-align: center;
+}
+
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid rgba($primary, 0.3);
+  border-top-color: $primary;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 16px;
+}
+
+.loadingText {
+  font-size: 14px;
+  color: $text-muted;
+}
+
+// =============================
+// Stats Cards
+// =============================
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  animation: slideUp 0.4s ease-out;
+}
+
+.statCard {
+  background: $surface-card;
+  border-radius: 16px;
+  border: 1px solid $border-subtle;
+  padding: 20px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: default;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.3);
+  }
+}
+
+.statHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.statLabel {
+  font-size: 13px;
+  font-weight: 500;
+  color: $text-secondary;
+}
+
+.statIcon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.statValue {
+  font-size: 28px;
+  font-weight: 800;
+  color: $text-primary;
+  line-height: 1;
+}
+
+.statSub {
+  font-size: 12px;
+  color: $text-muted;
+  margin-top: 4px;
+}
+
+// =============================
+// Filters
+// =============================
+.filtersRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  animation: slideUp 0.4s ease-out 0.15s both;
+}
+
+.filterButtons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.filterBtn {
+  padding: 8px 16px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid $border-subtle;
+  background: $surface-card;
+  color: $text-secondary;
+
+  &:hover {
+    border-color: rgba($primary, 0.3);
+    color: $text-primary;
+  }
+
+  &.filterActive {
+    background: $primary;
+    color: white;
+    border-color: $primary;
+    box-shadow: 0 4px 14px -2px rgba($primary, 0.2);
+  }
+}
+
+.searchGroup {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.searchInput {
+  width: 288px;
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 12px;
+  background: $surface-card;
+  border: 1px solid $border-subtle;
+  font-size: 14px;
+  color: $text-primary;
+  outline: none;
+  transition: border-color 0.2s;
+
+  &::placeholder {
+    color: $text-muted;
+  }
+
+  &:focus {
+    border-color: rgba($primary, 0.5);
+  }
+}
+
+.refreshBtn {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: $surface-card;
+  border: 1px solid $border-subtle;
+  color: $text-muted;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    border-color: rgba($primary, 0.3);
+    color: $primary;
+  }
+}
+
+// =============================
+// Banners
+// =============================
+.banner {
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  animation: fadeIn 0.5s ease-out;
+}
+
+.bannerMock {
+  background: rgba($status-paused, 0.1);
+  border: 1px solid rgba($status-paused, 0.2);
+
+  .bannerIcon {
+    color: $status-paused;
+  }
+
+  .bannerTitle {
+    color: $status-paused;
+  }
+}
+
+.bannerLive {
+  background: rgba($status-complete, 0.1);
+  border: 1px solid rgba($status-complete, 0.2);
+
+  .bannerIcon {
+    color: $status-complete;
+  }
+
+  .bannerTitle {
+    color: $status-complete;
+  }
+}
+
+.bannerIcon {
+  flex-shrink: 0;
+}
+
+.bannerTitle {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.bannerDesc {
+  font-size: 12px;
+  color: $text-muted;
+
+  code {
+    font-size: 11px;
+    background: rgba(255, 255, 255, 0.06);
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+}
+
+// =============================
+// Charts Row
+// =============================
+.chartsRow {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 24px;
+}
+
+.chartCard {
+  background: $surface-card;
+  border-radius: 16px;
+  border: 1px solid $border-subtle;
+  padding: 24px;
+  animation: slideUp 0.4s ease-out 0.2s both;
+}
+
+.chartHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.chartTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: $text-primary;
+}
+
+.chartSub {
+  font-size: 12px;
+  color: $text-muted;
+  margin-top: 2px;
+}
+
+.toggleBtn {
+  padding: 6px;
+  border-radius: 8px;
+  background: none;
+  border: none;
+  color: $text-muted;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: $surface-elevated;
+    color: $text-primary;
+  }
+}
+
+.chartBody {
+  overflow: hidden;
+  transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out, margin-top 0.3s ease-in-out;
+}
+
+.chartBodyOpen {
+  max-height: 600px;
+  opacity: 1;
+  margin-top: 20px;
+}
+
+.chartBodyClosed {
+  max-height: 0;
+  opacity: 0;
+  margin-top: 0;
+}
+
+// Donut chart
+.donutContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+.donutWrapper {
+  position: relative;
+}
+
+.donutCenter {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  .donutValue {
+    font-size: 30px;
+    font-weight: 700;
+    color: $text-primary;
+  }
+
+  .donutLabel {
+    font-size: 12px;
+    color: $text-muted;
+  }
+}
+
+.legendList {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.legendDot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+
+.legendLabel {
+  font-size: 14px;
+  color: $text-secondary;
+}
+
+.legendValue {
+  font-size: 14px;
+  font-weight: 700;
+  color: $text-primary;
+}
+
+.legendPct {
+  font-size: 12px;
+  color: $text-muted;
+  margin-left: 8px;
+}
+
+// Budget chart
+.budgetList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-height: 350px;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+.budgetItem {
+  .budgetMeta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+  }
+
+  .budgetTitle {
+    font-size: 12px;
+    font-weight: 500;
+    color: $text-secondary;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 60%;
+  }
+
+  .budgetPct {
+    font-size: 12px;
+    color: $text-muted;
+  }
+}
+
+.budgetBar {
+  position: relative;
+  height: 12px;
+  background: $surface-elevated;
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+
+.budgetBarPlanned {
+  position: absolute;
+  height: 100%;
+  background: rgba($status-progress, 0.3);
+  border-radius: 999px;
+  transition: width 1s ease-in-out;
+}
+
+.budgetBarActual {
+  position: absolute;
+  height: 100%;
+  border-radius: 999px;
+  transition: width 1s ease-in-out;
+}
+
+.budgetBarOk {
+  background: $status-complete;
+}
+
+.budgetBarOver {
+  background: $status-delayed;
+}
+
+.budgetHover {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: $text-muted;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.budgetItem:hover .budgetHover {
+  opacity: 1;
+}
+
+.chartLegend {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid $border-subtle;
+}
+
+.chartLegendItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  span {
+    font-size: 12px;
+    color: $text-muted;
+  }
+}
+
+.chartLegendDot {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+}
+
+// =============================
+// Project Table
+// =============================
+.tableContainer {
+  background: $surface-card;
+  border-radius: 16px;
+  border: 1px solid $border-subtle;
+  overflow: hidden;
+  animation: slideUp 0.4s ease-out 0.3s both;
+}
+
+.tableHeader {
+  padding: 20px 24px;
+  border-bottom: 1px solid $border-subtle;
+}
+
+.tableTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: $text-primary;
+}
+
+.tableCount {
+  font-size: 12px;
+  color: $text-muted;
+  margin-top: 2px;
+}
+
+.tableWrapper {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tableTh {
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  color: $text-muted;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: rgba($surface-elevated, 0.3);
+  border-bottom: 1px solid $border-subtle;
+  white-space: nowrap;
+}
+
+.tableTd {
+  padding: 14px 16px;
+  font-size: 13px;
+  color: $text-secondary;
+  border-bottom: 1px solid rgba($border-subtle, 0.5);
+  vertical-align: middle;
+}
+
+.tableRow {
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: $surface-card-hover;
+  }
+}
+
+.projectTitle {
+  font-weight: 600;
+  color: $text-primary;
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.statusDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.progressBarContainer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.progressBar {
+  flex: 1;
+  height: 6px;
+  background: $surface-elevated;
+  border-radius: 999px;
+  overflow: hidden;
+  min-width: 60px;
+}
+
+.progressBarFill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 1s ease-in-out;
+}
+
+.progressText {
+  font-size: 12px;
+  font-weight: 700;
+  min-width: 36px;
+  text-align: right;
+}
+
+.daysRemaining {
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.commentText {
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 12px;
+  color: $text-muted;
+}
+
+// =============================
+// Responsive
+// =============================
+@media (max-width: 1024px) {
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .chartsRow {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    display: none;
+  }
+
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .filtersRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .searchInput {
+    width: 100%;
+  }
+
+  .mainInner {
+    padding: 16px;
+  }
+}

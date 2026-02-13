@@ -1,0 +1,23 @@
+{
+  "@microsoft/generator-sharepoint": {
+    "whichFolder": "subdir",
+    "solutionName": "altbase-project-management",
+    "environment": "spo",
+    "packageManager": "npm",
+    "skipFeatureDeployment": true,
+    "useGulp": false,
+    "componentType": "webpart",
+    "template": "react",
+    "componentName": "AltbaseDashboard",
+    "componentDescription": "Dashboard de Acompanhamento de Projetos - Grandes Reparos",
+    "plusBeta": false,
+    "isCreatingSolution": true,
+    "nodeVersion": "22.13.1",
+    "sdksVersions": {},
+    "version": "1.22.2",
+    "libraryName": "altbase-project-management",
+    "libraryId": "3a029b81-1dde-4e3f-a6f0-fc7fce0127df",
+    "solutionShortDescription": "altbase-project-management description",
+    "isDomainIsolated": false
+  }
+}

@@ -1,10 +1,6 @@
-import type { Project } from '../types';
+import { IProject } from '../types';
 
-/**
- * Mock data simulating what would come from the SharePoint list
- * "Base-Projetos-Grandes-Reparos" after being populated from MPP files.
- */
-export const mockProjects: Project[] = [
+export const mockProjects: IProject[] = [
     {
         id: 1,
         title: 'Reforma do Alto-Forno 3',

@@ -1,48 +1,125 @@
 import React from 'react';
-import { LayoutDashboard, Users, Calendar, Settings, Inbox, Menu } from 'lucide-react';
+import {
+    LayoutDashboard,
+    FolderKanban,
+    FileSpreadsheet,
+    Settings,
+    HelpCircle,
+    Menu,
+} from 'lucide-react';
 
-export const Sidebar: React.FC = () => {
-    const categories = [
-        { label: 'Work Management', icon: <LayoutDashboard size={20} className="mr-3 text-monday-blue" />, active: true },
-        { label: 'Project Calendar', icon: <Calendar size={20} className="mr-3 text-monday-green" /> },
-        { label: 'Team', icon: <Users size={20} className="mr-3 text-monday-purple" /> },
-        { label: 'Inbox', icon: <Inbox size={20} className="mr-3 text-monday-red" /> },
-        { label: 'Settings', icon: <Settings size={20} className="mr-3 text-gray-500" /> },
+interface SidebarProps {
+    isOpen: boolean;
+    onClose: () => void;
+    activePage: string;
+    onNavigate: (page: string) => void;
+}
+
+export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, activePage, onNavigate }) => {
+    const navItems = [
+        { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+        { id: 'projects', label: 'Projetos', icon: FolderKanban },
+        { id: 'reports', label: 'Relatórios', icon: FileSpreadsheet },
+    ];
+
+    const bottomItems = [
+        { label: 'Configurações', icon: Settings },
+        { label: 'Ajuda', icon: HelpCircle },
     ];
 
     return (
-        <aside className="w-64 border-r border-gray-200 bg-white h-full flex flex-col hidden md:flex shadow-xl z-20">
-            <div className="p-4 h-16 flex items-center border-b border-gray-100">
-                <div className="w-8 h-8 bg-monday-blue rounded text-white flex items-center justify-center font-bold mr-2">M</div>
-                <span className="font-bold text-lg">Work OS</span>
-            </div>
-            <div className="p-4">
-                <div className="mb-6 flex items-center text-gray-400 text-sm font-semibold uppercase tracking-wider">
-                    <span className="flex-1">Main Workspace</span>
-                    <button className="hover:text-gray-600"><Menu size={16} /></button>
+        <>
+            {/* Overlay for mobile */}
+            {isOpen && (
+                <div
+                    className="fixed inset-0 bg-black/50 z-30 md:hidden"
+                    onClick={onClose}
+                />
+            )}
+
+            <aside
+                className={`
+          fixed md:static inset-y-0 left-0 z-40
+          bg-surface-card border-r border-border-subtle
+          flex flex-col transform transition-all duration-300 ease-in-out overflow-hidden
+          ${isOpen ? 'translate-x-0 w-64' : '-translate-x-full md:translate-x-0 md:w-0 md:border-none w-64'}
+        `}
+            >
+                {/* Logo area */}
+                <div className="h-16 flex items-center justify-between px-5 border-b border-border-subtle min-w-[16rem]">
+                    <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary-light flex items-center justify-center text-white font-bold text-sm shadow-lg">
+                            <Settings size={20} />
+                        </div>
+                        <span className="font-bold text-lg text-text-primary tracking-tight">EUCS</span>
+                    </div>
+                    <button
+                        onClick={onClose}
+                        className="p-1.5 rounded-lg hover:bg-surface-elevated transition-colors text-text-muted"
+                    >
+                        <Menu size={20} />
+                    </button>
                 </div>
 
-                <nav className="space-y-1">
-                    {categories.map((cat, idx) => (
-                        <button
-                            key={idx}
-                            className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors 
-                                ${cat.active ? 'bg-blue-50 text-monday-blue' : 'text-gray-600 hover:bg-gray-50'}`}
-                        >
-                            {cat.icon}
-                            {cat.label}
-                        </button>
-                    ))}
+                {/* Navigation */}
+                <nav className="flex-1 p-4 space-y-1">
+                    <p className="text-xs font-semibold text-text-muted uppercase tracking-widest mb-3 px-3">
+                        Menu
+                    </p>
+                    {navItems.map((item) => {
+                        const Icon = item.icon;
+                        return (
+                            <button
+                                key={item.id}
+                                onClick={() => {
+                                    onNavigate(item.id);
+                                    if (window.innerWidth < 768) onClose();
+                                }}
+                                className={`
+                  w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200
+                  ${activePage === item.id
+                                        ? 'bg-primary/10 text-primary border border-primary/20'
+                                        : 'text-text-secondary hover:bg-surface-elevated hover:text-text-primary'
+                                    }
+                `}
+                            >
+                                <Icon size={18} />
+                                {item.label}
+                            </button>
+                        );
+                    })}
                 </nav>
-            </div>
 
-            <div className="p-4 border-t border-gray-100 mt-auto">
-                <div className="bg-gradient-to-tr from-monday-blue to-purple-500 rounded-lg p-4 text-white text-center">
-                    <h4 className="font-bold text-sm mb-2">Upgrade to Pro</h4>
-                    <p className="text-xs opacity-80 mb-3">Unlock unlimited projects & Gantt charts</p>
-                    <button className="bg-white text-monday-dark text-xs font-semibold py-2 px-4 rounded shadow-sm hover:shadow-md transition-shadow w-full">View Plans</button>
+                {/* Bottom items */}
+                <div className="p-4 border-t border-border-subtle space-y-1">
+                    {bottomItems.map((item) => {
+                        const Icon = item.icon;
+                        return (
+                            <button
+                                key={item.label}
+                                className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-xl text-text-muted hover:bg-surface-elevated hover:text-text-secondary transition-all duration-200"
+                            >
+                                <Icon size={18} />
+                                {item.label}
+                            </button>
+                        );
+                    })}
                 </div>
-            </div>
-        </aside>
+
+                {/* MPP Info card */}
+                <div className="p-4">
+                    <div className="rounded-xl bg-gradient-to-br from-primary/10 to-primary-dark/5 border border-primary/15 p-4">
+                        <p className="text-xs font-semibold text-primary mb-1">SharePoint Sync</p>
+                        <p className="text-xs text-text-muted leading-relaxed">
+                            Dados sincronizados via Power Automate a partir dos arquivos MPP.
+                        </p>
+                        <div className="mt-3 flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full bg-status-complete animate-pulse"></div>
+                            <span className="text-xs text-status-complete font-medium">Conectado</span>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </>
     );
 };
