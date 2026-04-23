@@ -8,7 +8,6 @@ import { StatusChart } from './dashboard/StatusChart';
 import { BudgetChart } from './dashboard/BudgetChart';
 import { ProjectTable } from './dashboard/ProjectTable';
 import { fetchProjectsFromSP, initSP } from '../services/spService';
-import { mockProjects } from '../services/mockData';
 import { calculateStats } from '../utils/helpers';
 import { IProject } from '../types';
 import { RefreshCw, CloudOff, PlugZap } from 'lucide-react';
@@ -43,15 +42,21 @@ export default class AltbaseDashboard extends React.Component<IAltbaseDashboardP
   private _loadData = async (): Promise<void> => {
     this.setState({ loading: true });
     try {
+      // Tenta buscar do SharePoint real (comentado para forçar uso de mocks)
+      /*
       const spData = await fetchProjectsFromSP();
       if (spData && spData.length > 0) {
         this.setState({ projects: spData, usingMockData: false });
       } else {
         throw new Error("Nenhum dado retornado ou lista vazia.");
       }
+      */
+
+      // Força o uso de lista inicial vazia local (se mockData estivesse forçado)
+      this.setState({ projects: [], usingMockData: true });
     } catch (error) {
-      console.warn("Falha ao carregar do SharePoint, usando dados de exemplo.", error);
-      this.setState({ projects: mockProjects, usingMockData: true });
+      console.warn("Falha ao carregar dados.", error);
+      this.setState({ projects: [], usingMockData: true });
     } finally {
       this.setState({ loading: false });
     }

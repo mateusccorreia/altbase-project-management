@@ -65,7 +65,7 @@ export const BudgetChart: React.FC<BudgetChartProps> = ({ projects }) => {
                                     <div className="w-16 text-[11px] uppercase tracking-wide text-text-muted font-medium">Orçado</div>
                                     <div className="flex-1 h-2.5 bg-surface-elevated rounded-full overflow-hidden">
                                         <div
-                                            className="h-full bg-blue-500/40 rounded-full transition-all duration-500 group-hover:bg-blue-500/60"
+                                            className="h-full bg-amp-lilac/30 rounded-full transition-all duration-500 group-hover:bg-amp-lilac/50"
                                             style={{ width: `${budgetPct}%` }}
                                         />
                                     </div>
@@ -79,11 +79,11 @@ export const BudgetChart: React.FC<BudgetChartProps> = ({ projects }) => {
                                     <div className="w-16 text-[11px] uppercase tracking-wide text-text-muted font-medium">Realizado</div>
                                     <div className="flex-1 h-2.5 bg-surface-elevated rounded-full overflow-hidden">
                                         <div
-                                            className={`h-full rounded-full transition-all duration-500 ${isOverBudget ? 'bg-red-500' : 'bg-emerald-500 group-hover:bg-emerald-400'}`}
+                                            className={`h-full rounded-full transition-all duration-500 ${isOverBudget ? 'bg-amp-red' : 'bg-status-complete group-hover:bg-emerald-400'}`}
                                             style={{ width: `${actualPct}%` }}
                                         />
                                     </div>
-                                    <div className={`w-24 text-xs font-bold text-right tabular-nums ${isOverBudget ? 'text-red-400' : 'text-emerald-400'}`}>
+                                    <div className={`w-24 text-xs font-bold text-right tabular-nums ${isOverBudget ? 'text-amp-red' : 'text-status-complete'}`}>
                                         {formatCurrency(project.actualCost)}
                                     </div>
                                 </div>
@@ -94,15 +94,15 @@ export const BudgetChart: React.FC<BudgetChartProps> = ({ projects }) => {
 
                 <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 mt-6 pt-4 border-t border-border-subtle">
                     <div className="flex items-center gap-2">
-                        <div className="w-2.5 h-2.5 rounded-full bg-blue-500/40"></div>
+                        <div className="w-2.5 h-2.5 rounded-full bg-amp-lilac/40"></div>
                         <span className="text-xs text-text-secondary">Orçamento</span>
                     </div>
                     <div className="flex items-center gap-2">
-                        <div className="w-2.5 h-2.5 rounded-full bg-emerald-500"></div>
+                        <div className="w-2.5 h-2.5 rounded-full bg-status-complete"></div>
                         <span className="text-xs text-text-secondary">Executado (No prazo)</span>
                     </div>
                     <div className="flex items-center gap-2">
-                        <div className="w-2.5 h-2.5 rounded-full bg-red-500"></div>
+                        <div className="w-2.5 h-2.5 rounded-full bg-amp-red"></div>
                         <span className="text-xs text-text-secondary">Executado (Extrapolado)</span>
                     </div>
                 </div>

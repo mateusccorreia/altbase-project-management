@@ -10,8 +10,8 @@ import { SP_FIELD_MAP } from "../types";
 // SharePoint Configuration
 // ============================================================
 
-const SHAREPOINT_SITE_URL = "https://your-tenant.sharepoint.com/sites/your-site";
-const LIST_NAME = "Base-Projetos-Grandes-Reparos"; // Nome de Exibição (com hífens)
+const SHAREPOINT_SITE_URL = "https://arcelormittal.sharepoint.com/sites/GernciadePlanejamentoeProgramao";
+const LIST_NAME = "BaseProjetosGrandesReparos"; // Nome da lista (sem hífens conforme URL)
 
 // ============================================================
 // SharePoint Connection (for SPFx context)
@@ -72,7 +72,8 @@ export async function fetchProjectsFromSP(fullSiteUrl: string): Promise<Project[
         });
 
         if (response.status === 401 || response.status === 403) {
-            throw new Error(`Acesso negado (${response.status}). Certifique-se de estar logado no SharePoint no navegador.`);
+            console.warn("Acesso ao SharePoint negado. Usando dados mock para continuar...");
+            return []; // Retorna array vazio para forçar o uso do mock no App.tsx
         }
 
         if (!response.ok) {

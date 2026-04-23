@@ -63,10 +63,10 @@ export const StatusChart: React.FC<StatusChartProps> = ({ projects }) => {
 
                                 const colorMap: Record<string, string> = {
                                     'bg-status-complete': '#10B981', // Green
-                                    'bg-status-progress': '#3B82F6', // Blue
-                                    'bg-status-delayed': '#EF4444',  // Red
+                                    'bg-status-progress': '#BE2878', // Lilac
+                                    'bg-status-delayed': '#E63C46',  // Red
                                     'bg-status-paused': '#F59E0B',   // Amber
-                                    'bg-status-notstarted': '#6B7280', // Slate
+                                    'bg-status-notstarted': '#64748B', // Slate
                                 };
 
                                 return (

@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import type { Project } from '../../types';
 import { formatCurrency, formatDate, getStatusColor, getProgressColor, getDaysRemaining } from '../../utils/helpers';
-import { ChevronDown, ChevronUp, MessageSquare, Calendar, Clock } from 'lucide-react';
+import { ChevronDown, ChevronUp, MessageSquare, Calendar, Clock, Edit2, Trash2 } from 'lucide-react';
 
 interface ProjectTableProps {
     projects: Project[];
+    onEdit?: (project: Project) => void;
+    onDelete?: (projectId: number) => void;
 }
 
-export const ProjectTable: React.FC<ProjectTableProps> = ({ projects }) => {
+export const ProjectTable: React.FC<ProjectTableProps> = ({ projects, onEdit, onDelete }) => {
     const [expandedId, setExpandedId] = useState<number | null>(null);
     const [sortField, setSortField] = useState<keyof Project>('progress');
     const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
@@ -76,7 +78,7 @@ export const ProjectTable: React.FC<ProjectTableProps> = ({ projects }) => {
                             <th className={`${headerClass} text-right`} onClick={() => handleSort('actualCost')}>
                                 <span className="flex items-center justify-end gap-1">Realizado <SortIcon field="actualCost" /></span>
                             </th>
-                            <th className={`${headerClass} text-center w-10`}></th>
+                            <th className={`${headerClass} text-center w-[120px]`}>Ações</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -110,12 +112,12 @@ export const ProjectTable: React.FC<ProjectTableProps> = ({ projects }) => {
                                         </td>
 
                                         {/* Status */}
-                                        <td className="px-4 py-3.5 text-center">
-                                            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold text-white ${getStatusColor(project.status)}`}>
-                                                <span className="w-1.5 h-1.5 rounded-full bg-white/40"></span>
-                                                {project.status}
-                                            </span>
-                                        </td>
+                                         <td className="px-4 py-3.5 text-center">
+                                             <span className={`inline-flex items-center justify-center gap-1.5 w-32 px-3 py-1 rounded-full text-xs font-semibold text-white ${getStatusColor(project.status)}`}>
+                                                 <span className="w-1.5 h-1.5 rounded-full bg-white/40 shrink-0"></span>
+                                                 {project.status}
+                                             </span>
+                                         </td>
 
                                         {/* Start Date */}
                                         <td className="px-4 py-3.5 text-center text-sm text-text-secondary">
@@ -160,14 +162,34 @@ export const ProjectTable: React.FC<ProjectTableProps> = ({ projects }) => {
                                             </span>
                                         </td>
 
-                                        {/* Expand */}
+                                        {/* Actions */}
                                         <td className="px-4 py-3.5 text-center">
-                                            <button
-                                                onClick={() => setExpandedId(isExpanded ? null : project.id)}
-                                                className="p-1.5 rounded-lg hover:bg-surface-elevated transition-colors text-text-muted hover:text-text-secondary"
-                                            >
-                                                {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                                            </button>
+                                            <div className="flex items-center justify-center gap-1">
+                                                <button
+                                                    onClick={() => onEdit?.(project)}
+                                                    className="p-1.5 rounded-lg hover:bg-primary/10 text-text-muted hover:text-primary transition-colors"
+                                                    title="Editar projeto"
+                                                >
+                                                    <Edit2 size={16} />
+                                                </button>
+                                                <button
+                                                    onClick={() => {
+                                                        if (window.confirm(`Excluir o projeto "${project.title}"?`)) {
+                                                            onDelete?.(project.id);
+                                                        }
+                                                    }}
+                                                    className="p-1.5 rounded-lg hover:bg-status-delayed/10 text-text-muted hover:text-status-delayed transition-colors"
+                                                    title="Excluir projeto"
+                                                >
+                                                    <Trash2 size={16} />
+                                                </button>
+                                                <button
+                                                    onClick={() => setExpandedId(isExpanded ? null : project.id)}
+                                                    className="p-1.5 rounded-lg hover:bg-surface-elevated transition-colors text-text-muted hover:text-text-secondary ml-1"
+                                                >
+                                                    {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
 

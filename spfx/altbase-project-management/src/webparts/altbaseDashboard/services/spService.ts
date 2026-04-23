@@ -1,29 +1,32 @@
 import { spfi, SPFx } from "@pnp/sp";
-import "@pnp/sp/webs";
+import { Web } from "@pnp/sp/webs";
 import "@pnp/sp/lists";
 import "@pnp/sp/items";
 import { LogLevel, PnPLogging } from "@pnp/logging";
 import { WebPartContext } from "@microsoft/sp-webpart-base";
 import { IProject } from "../types";
-import { SP_FIELD_MAP } from "../types";
+import { SP_FIELD_MAP } from "../types/index";
 
 // ============================================================
 // SharePoint Configuration
 // ============================================================
 
-const LIST_NAME = "Base-Projetos-Grandes-Reparos";
+const TARGET_SITE_URL = "https://arcelormittal.sharepoint.com/sites/GernciadePlanejamentoeProgramao";
+const LIST_NAME = "BaseProjetosGrandesReparos";
 
 // ============================================================
 // PnPjs SP instance (initialized via SPFx context)
 // ============================================================
 
 let _sp: ReturnType<typeof spfi> | undefined = undefined;
+let _context: WebPartContext | undefined = undefined;
 
 /**
  * Initialize the PnPjs SP instance using the SPFx webpart context.
  * This provides automatic authentication — no manual token needed.
  */
 export const initSP = (context: WebPartContext): void => {
+    _context = context;
     _sp = spfi().using(
         SPFx(context),
         PnPLogging(LogLevel.Warning)
@@ -41,13 +44,15 @@ export const getSP = (): ReturnType<typeof spfi> | undefined => _sp;
  * Leverages the SPFx context for seamless authentication.
  */
 export async function fetchProjectsFromSP(): Promise<IProject[]> {
-    const sp = getSP();
-    if (!sp) {
+    if (!_context) {
         throw new Error("SP not initialized. Call initSP(context) first in the webpart.");
     }
 
+    // Create a Web instance pointing to the specific site
+    const web = Web(TARGET_SITE_URL).using(SPFx(_context));
+
     try {
-        const items = await sp.web.lists
+        const items = await web.lists
             .getByTitle(LIST_NAME)
             .items
             .select(

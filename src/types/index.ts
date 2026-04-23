@@ -44,3 +44,15 @@ export const SP_FIELD_MAP = {
     actualCost: 'Custo_x0020_Realizado',
     comments: 'Coment_x00e1_rios',
 } as const;
+
+export interface TimelineTask {
+    id: string;
+    project: string;
+    company: string;
+    activity: string;
+    startDate: string;
+    endDate: string;
+    predecessor?: string;
+    isCompleted: boolean;
+    color?: string;
+}
