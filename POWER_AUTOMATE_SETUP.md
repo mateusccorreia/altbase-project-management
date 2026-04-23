@@ -147,7 +147,7 @@ Sub ExportToSharePoint()
     ' ===== CONFIGURE THESE =====
     ' Path to the SharePoint/OneDrive synced folder
     Dim exportPath As String
-    exportPath = Environ("OneDrive") & "\ArcelorMittal\Documentos\Projetos_MPP\"
+    exportPath = Environ("OneDrive") & "\Documentos\Projetos_MPP\"
     
     ' File name (use project name)
     Dim fileName As String

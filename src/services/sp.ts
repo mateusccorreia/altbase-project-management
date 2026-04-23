@@ -10,7 +10,7 @@ import { SP_FIELD_MAP } from "../types";
 // SharePoint Configuration
 // ============================================================
 
-const SHAREPOINT_SITE_URL = "https://arcelormittal.sharepoint.com/sites/GernciadePlanejamentoeProgramao";
+const SHAREPOINT_SITE_URL = "https://your-company.sharepoint.com/sites/YourProjectSite";
 const LIST_NAME = "BaseProjetosGrandesReparos"; // Nome da lista (sem hífens conforme URL)
 
 // ============================================================

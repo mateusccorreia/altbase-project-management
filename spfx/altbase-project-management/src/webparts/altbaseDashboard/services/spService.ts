@@ -11,7 +11,7 @@ import { SP_FIELD_MAP } from "../types/index";
 // SharePoint Configuration
 // ============================================================
 
-const TARGET_SITE_URL = "https://arcelormittal.sharepoint.com/sites/GernciadePlanejamentoeProgramao";
+const TARGET_SITE_URL = "https://your-company.sharepoint.com/sites/YourProjectSite";
 const LIST_NAME = "BaseProjetosGrandesReparos";
 
 // ============================================================
