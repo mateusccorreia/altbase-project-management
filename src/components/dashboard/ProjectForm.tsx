@@ -84,20 +84,15 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({ initialData, onSave, o
                         <label className="text-sm font-medium text-text-secondary flex items-center gap-2">
                             <User size={16} /> Coordenador
                         </label>
-                        <select
+                        <input
+                            type="text"
                             name="coordinator"
                             required
                             value={formData.coordinator}
                             onChange={handleChange}
-                            className="w-full h-10 px-4 rounded-xl bg-surface-elevated border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all appearance-none"
-                        >
-                            <option value="">Selecione um coordenador</option>
-                            <option value="Darlan Castro">Darlan Castro</option>
-                            <option value="João Edmilson">João Edmilson</option>
-                            <option value="Larissa Ferreira">Larissa Ferreira</option>
-                            <option value="Mateus Correia">Mateus Correia</option>
-                            <option value="Patrícia Macedo">Patrícia Macedo</option>
-                        </select>
+                            className="w-full h-10 px-4 rounded-xl bg-surface-elevated border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+                            placeholder="Nome do coordenador"
+                        />
                     </div>
 
                     {/* Status */}

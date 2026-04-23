@@ -6,9 +6,10 @@ import type { TimelineTask } from '../../types';
 
 interface TimelineSectionProps {
     projects: string[];
+    onAddProject: () => void;
 }
 
-export const TimelineSection: React.FC<TimelineSectionProps> = ({ projects }) => {
+export const TimelineSection: React.FC<TimelineSectionProps> = ({ projects, onAddProject }) => {
     const [tasks, setTasks] = useState<TimelineTask[]>(() => {
         const saved = localStorage.getItem('altbase_tasks');
         const parsed = saved ? JSON.parse(saved) : [];
@@ -22,7 +23,7 @@ export const TimelineSection: React.FC<TimelineSectionProps> = ({ projects }) =>
     const [markerOffset, setMarkerOffset] = useState(100);
     const [savedScroll, setSavedScroll] = useState({ left: 0, top: 0 });
     const [isFullscreen, setIsFullscreen] = useState(false);
-    const [viewMode, setViewMode] = useState<'hours' | 'days'>('hours');
+    const [viewMode, setViewMode] = useState<'hours' | 'days' | 'weeks' | 'months'>('hours');
     const [savedScrollY, setSavedScrollY] = useState<{ windowY: number, containerY: number } | null>(null);
     const fullscreenRef = useRef<HTMLDivElement>(null);
 
@@ -282,6 +283,18 @@ export const TimelineSection: React.FC<TimelineSectionProps> = ({ projects }) =>
                             >
                                 Dias
                             </button>
+                            <button
+                                onClick={() => setViewMode('weeks')}
+                                className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-colors ${viewMode === 'weeks' ? 'bg-primary text-white shadow-sm' : 'text-text-muted hover:text-text-primary'}`}
+                            >
+                                Semanas
+                            </button>
+                            <button
+                                onClick={() => setViewMode('months')}
+                                className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-colors ${viewMode === 'months' ? 'bg-primary text-white shadow-sm' : 'text-text-muted hover:text-text-primary'}`}
+                            >
+                                Meses
+                            </button>
                         </div>
                         <button
                             onClick={toggleFullscreen}
@@ -308,6 +321,13 @@ export const TimelineSection: React.FC<TimelineSectionProps> = ({ projects }) =>
                         >
                             <Plus size={16} />
                             <span className="hidden sm:inline">Nova Atividade</span>
+                        </button>
+                        <button
+                            onClick={onAddProject}
+                            className="h-10 px-4 flex-1 sm:flex-none flex items-center justify-center gap-2 rounded-xl bg-surface-elevated hover:bg-surface-elevated/80 border border-border-subtle text-text-primary transition-all text-sm font-medium"
+                        >
+                            <Plus size={16} />
+                            <span className="hidden sm:inline">Novo Projeto</span>
                         </button>
                     </div>
                 )}

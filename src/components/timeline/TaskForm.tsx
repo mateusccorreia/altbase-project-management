@@ -111,9 +111,10 @@ export const TaskForm: React.FC<TaskFormProps> = ({ onSave, onCancel, projects, 
                     <input
                         type="text"
                         required
+                        readOnly={!!initialProject}
                         value={project}
                         onChange={(e) => setProject(e.target.value)}
-                        className="w-full h-11 px-4 rounded-xl bg-surface-dark border border-border-subtle text-text-primary placeholder:text-text-muted focus:outline-none focus:border-primary/50 transition-all shadow-sm"
+                        className={`w-full h-11 px-4 rounded-xl border text-text-primary placeholder:text-text-muted focus:outline-none transition-all shadow-sm ${!!initialProject ? 'bg-surface-elevated cursor-not-allowed border-primary/20 font-bold text-primary' : 'bg-surface-dark border-border-subtle focus:border-primary/50'}`}
                         placeholder="Nome do Projeto"
                         list="project-list"
                     />
@@ -231,11 +232,13 @@ export const TaskForm: React.FC<TaskFormProps> = ({ onSave, onCancel, projects, 
                             >
                                 <option value="">Nenhuma</option>
                                 {/* Atividades já salvas */}
-                                {existingTasks.filter(t => t.id !== taskToEdit?.id).map(t => (
-                                    <option key={t.id} value={t.id}>
-                                        {t.activity}
-                                    </option>
-                                ))}
+                                {existingTasks
+                                    .filter(t => t.id !== taskToEdit?.id && t.project === project)
+                                    .map(t => (
+                                        <option key={t.id} value={t.id}>
+                                            {t.activity}
+                                        </option>
+                                    ))}
                                 {/* Outras atividades neste formulário que vieram antes */}
                                 {activities.slice(0, index).map((otherAct) => (
                                     otherAct.activity && (

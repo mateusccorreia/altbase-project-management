@@ -18,7 +18,7 @@ interface GanttChartProps {
     onRenameProject: (oldName: string, newName: string) => void;
     onReorderTasks: (tasks: TimelineTask[]) => void;
     onLinkTasks: (predecessorId: string, successorId: string) => void;
-    viewMode: 'hours' | 'days';
+    viewMode: 'hours' | 'days' | 'weeks' | 'months';
 }
 
 export const GanttChart: React.FC<GanttChartProps> = ({ 
@@ -37,7 +37,7 @@ export const GanttChart: React.FC<GanttChartProps> = ({
     scrollTop,
     onScrollChange
 }) => {
-    const CELL_WIDTH = viewMode === 'hours' ? 30 : 6;
+    const CELL_WIDTH = viewMode === 'hours' ? 30 : viewMode === 'days' ? 6 : viewMode === 'weeks' ? 1.2 : 0.25;
     const [leftColumnWidth, setLeftColumnWidth] = useState(280);
     const isResizing = useRef(false);
     const isDraggingMarker = useRef(false);
@@ -472,6 +472,33 @@ export const GanttChart: React.FC<GanttChartProps> = ({
                                 const isLabelBound = date.getHours() % labelInterval === 0;
                                 const isEvenDay = getDate(date) % 2 === 0;
 
+                                if (viewMode === 'months') {
+                                    if (!isMidnight || date.getDate() !== 1) { // Só mostra no início do mês
+                                        if (idx !== 0) return null;
+                                    }
+                                    const daysInMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+                                    return (
+                                        <div key={date.toISOString()} className={`flex-shrink-0 flex items-center justify-center border-l border-border-subtle/50 ${isEvenDay ? 'bg-surface-dark/5' : ''}`} style={{ width: `${CELL_WIDTH * 24 * daysInMonth}px` }}>
+                                            <span className="text-[10px] uppercase font-bold text-text-primary px-2 bg-surface-elevated/80 rounded z-10 whitespace-nowrap">
+                                                {format(date, 'MMMM yyyy', { locale: ptBR })}
+                                            </span>
+                                        </div>
+                                    );
+                                }
+
+                                if (viewMode === 'weeks') {
+                                    if (!isMidnight || date.getDay() !== 1) { // Só mostra no início da semana (Segunda)
+                                        if (idx !== 0) return null;
+                                    }
+                                    return (
+                                        <div key={date.toISOString()} className={`flex-shrink-0 flex items-center justify-center border-l border-border-subtle/50 ${isEvenDay ? 'bg-surface-dark/5' : ''}`} style={{ width: `${CELL_WIDTH * 168}px` }}>
+                                            <span className="text-[10px] uppercase font-bold text-text-primary px-2 bg-surface-elevated/80 rounded z-10 whitespace-nowrap">
+                                                {format(date, 'dd MMM', { locale: ptBR })} - {format(addHours(date, 167), 'dd MMM', { locale: ptBR })}
+                                            </span>
+                                        </div>
+                                    );
+                                }
+
                                 if (viewMode === 'days') {
                                     if (!isMidnight && idx !== 0) return null;
                                     return (
@@ -512,6 +539,25 @@ export const GanttChart: React.FC<GanttChartProps> = ({
                                     const isInterval = date.getHours() % labelInterval === 0;
                                     const isMidnight = date.getHours() === 0;
                                     const isEvenDay = getDate(date) % 2 === 0;
+
+                                    if (viewMode === 'months') {
+                                        if (!isMidnight || date.getDate() !== 1) {
+                                            if (i !== 0) return null;
+                                        }
+                                        const daysInMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+                                        return (
+                                            <div key={i} className={`flex-shrink-0 border-r ${isEvenDay ? 'bg-surface-dark/10' : ''} border-border-subtle/20 border-r-2`} style={{ width: `${CELL_WIDTH * 24 * daysInMonth}px` }} />
+                                        );
+                                    }
+
+                                    if (viewMode === 'weeks') {
+                                        if (!isMidnight || date.getDay() !== 1) {
+                                            if (i !== 0) return null;
+                                        }
+                                        return (
+                                            <div key={i} className={`flex-shrink-0 border-r ${isEvenDay ? 'bg-surface-dark/10' : ''} border-border-subtle/20 border-r-2`} style={{ width: `${CELL_WIDTH * 168}px` }} />
+                                        );
+                                    }
 
                                     if (viewMode === 'days') {
                                         if (!isMidnight && i !== 0) return null;

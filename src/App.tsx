@@ -370,7 +370,20 @@ function App() {
 
                 {/* ================= TIMELINE VIEW ================= */}
                 {activePage === 'timeline' && (
-                  <TimelineSection projects={Array.from(new Set(projects.map(p => p.title)))} />
+                  <div className="animate-fade-in">
+                    {showForm ? (
+                      <ProjectForm
+                        initialData={editingProject || undefined}
+                        onSave={handleSaveProject}
+                        onCancel={() => { setShowForm(false); setEditingProject(null); }}
+                      />
+                    ) : (
+                      <TimelineSection 
+                        projects={Array.from(new Set(projects.map(p => p.title)))} 
+                        onAddProject={() => { setEditingProject(null); setShowForm(true); }}
+                      />
+                    )}
+                  </div>
                 )}
 
                 {/* ================= REPORTS VIEW (Placeholder) ================= */}
