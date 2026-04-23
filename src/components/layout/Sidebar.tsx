@@ -8,6 +8,7 @@ import {
     Menu,
     CalendarDays,
     ClipboardList,
+    LogIn,
 } from 'lucide-react';
 
 interface SidebarProps {
