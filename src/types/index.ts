@@ -18,9 +18,9 @@ export type ProjectStatus =
     | 'Concluído'
     | 'Atrasado'
     | 'Pausado'
-    | 'Verde'    // Mapped in UI
-    | 'Vermelho' // Mapped in UI
-    | 'Amarelo'; // Mapped in UI
+    | 'Verde'
+    | 'Vermelho'
+    | 'Amarelo';
 
 export interface DashboardStats {
     totalProjects: number;
@@ -32,14 +32,13 @@ export interface DashboardStats {
     totalActualCost: number;
 }
 
-// SharePoint field mappings (guesses based on standard encoding)
 export const SP_FIELD_MAP = {
     title: 'Title',
     coordinator: 'Coordenador_x0020_do_x0020_Projeto',
     status: 'Status',
-    startDate: 'Dt_x002e__x0020_de_x0020_In_x00ed_cio', // "Dt. de Início"
-    endDate: 'Dt_x002e__x0020_de_x0020_T_x00e9_rmino',   // "Dt. de Término"
-    progress: 'Progresso', // Often simplified, or 'Progresso_x0020__x0028__x0025__x0029_'
+    startDate: 'Dt_x002e__x0020_de_x0020_In_x00ed_cio',
+    endDate: 'Dt_x002e__x0020_de_x0020_T_x00e9_rmino',
+    progress: 'Progresso',
     budgetCost: 'Custo_x0020_Or_x00e7_ado',
     actualCost: 'Custo_x0020_Realizado',
     comments: 'Coment_x00e1_rios',
@@ -52,6 +51,7 @@ export interface TimelineTask {
     activity: string;
     startDate: string;
     endDate: string;
+    duration?: number; // Duration in hours
     predecessor?: string;
     isCompleted: boolean;
     color?: string;

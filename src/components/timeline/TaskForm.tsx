@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, X, Calendar as CalendarIcon, Save, Trash2, CheckCircle2, Circle } from 'lucide-react';
+import { Plus, X, Save, Trash2, CheckCircle2, Circle, Clock } from 'lucide-react';
 import type { TimelineTask } from '../../types';
 
 interface TaskFormProps {
@@ -15,40 +15,66 @@ interface TaskFormProps {
 interface ActivityEntry {
     tempId: string;
     activity: string;
-    startDate: string;
-    endDate: string;
+    duration: number;
     predecessor: string;
     isCompleted: boolean;
     color?: string;
 }
 
+const DEFAULT_DURATION_HOURS = 8;
+const HOUR_IN_MS = 60 * 60 * 1000;
+
 const PREDEFINED_COLORS = [
-    'bg-amp-orange', 'bg-amp-lilac', 'bg-amp-red', 'bg-amp-orange-2', 
+    'bg-amp-orange', 'bg-amp-lilac', 'bg-amp-red', 'bg-amp-orange-2',
     'bg-blue-500', 'bg-emerald-500', 'bg-purple-500', 'bg-rose-500',
     'bg-cyan-500', 'bg-amber-500', 'bg-slate-500'
 ];
 
+const formatLocalDateTime = (date: Date) => {
+    const pad = (value: number) => value.toString().padStart(2, '0');
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+};
+
+const getRoundedCurrentHour = () => {
+    const date = new Date();
+    date.setMinutes(0, 0, 0);
+    return date;
+};
+
+const getDurationHours = (startDate: string, endDate: string) => {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const duration = Math.round((end.getTime() - start.getTime()) / HOUR_IN_MS);
+    return Number.isFinite(duration) ? Math.max(1, duration) : DEFAULT_DURATION_HOURS;
+};
+
+const sanitizeDuration = (value: number) => {
+    if (!Number.isFinite(value) || value < 1) return DEFAULT_DURATION_HOURS;
+    return Math.max(1, Math.round(value));
+};
+
 export const TaskForm: React.FC<TaskFormProps> = ({ onSave, onCancel, projects, existingTasks, taskToEdit, initialProject, initialCompany }) => {
     const [project, setProject] = useState(taskToEdit?.project || initialProject || '');
     const [company, setCompany] = useState(taskToEdit?.company || initialCompany || '');
-    
+    const isProjectLocked = Boolean(initialProject);
+
     const [activities, setActivities] = useState<ActivityEntry[]>(() => {
         if (taskToEdit) {
+            const durationHours = taskToEdit.duration || getDurationHours(taskToEdit.startDate, taskToEdit.endDate);
             return [{
                 tempId: taskToEdit.id,
                 activity: taskToEdit.activity,
-                startDate: taskToEdit.startDate,
-                endDate: taskToEdit.endDate,
+                duration: durationHours,
                 predecessor: taskToEdit.predecessor || '',
                 isCompleted: taskToEdit.isCompleted || false,
                 color: taskToEdit.color
             }];
         }
-        return [{ tempId: crypto.randomUUID(), activity: '', startDate: '', endDate: '', predecessor: '', isCompleted: false, color: undefined }];
+        return [{ tempId: crypto.randomUUID(), activity: '', duration: DEFAULT_DURATION_HOURS, predecessor: '', isCompleted: false, color: undefined }];
     });
 
     const handleAddActivity = () => {
-        setActivities([...activities, { tempId: crypto.randomUUID(), activity: '', startDate: '', endDate: '', predecessor: '', isCompleted: false, color: undefined }]);
+        setActivities([...activities, { tempId: crypto.randomUUID(), activity: '', duration: DEFAULT_DURATION_HOURS, predecessor: '', isCompleted: false, color: undefined }]);
     };
 
     const handleRemoveActivity = (id: string) => {
@@ -57,25 +83,64 @@ export const TaskForm: React.FC<TaskFormProps> = ({ onSave, onCancel, projects, 
         }
     };
 
-    const handleChangeActivity = (id: string, field: keyof ActivityEntry, value: any) => {
+    const handleChangeActivity = <K extends keyof ActivityEntry>(id: string, field: K, value: ActivityEntry[K]) => {
         setActivities(activities.map(a => a.tempId === id ? { ...a, [field]: value } : a));
     };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        
-        const tasksToSave: TimelineTask[] = activities.map(act => ({
-            id: act.tempId,
-            project,
-            company,
-            activity: act.activity,
-            startDate: act.startDate,
-            endDate: act.endDate,
-            predecessor: act.predecessor || undefined,
-            isCompleted: act.isCompleted,
-            color: act.color
-        }));
-        
+
+        const defaultStart = getRoundedCurrentHour();
+        const scheduledNewTasks: TimelineTask[] = [];
+
+        const tasksToSave: TimelineTask[] = activities.map(act => {
+            const duration = sanitizeDuration(act.duration);
+
+            if (taskToEdit) {
+                const existingTask = existingTasks.find(t => t.id === act.tempId);
+                if (existingTask) {
+                    const start = new Date(existingTask.startDate);
+                    const end = new Date(start.getTime() + duration * HOUR_IN_MS);
+                    return {
+                        id: act.tempId,
+                        project,
+                        company,
+                        activity: act.activity,
+                        startDate: existingTask.startDate,
+                        endDate: formatLocalDateTime(end),
+                        duration,
+                        predecessor: act.predecessor || undefined,
+                        isCompleted: act.isCompleted,
+                        color: act.color
+                    };
+                }
+            }
+
+            const predecessorTask = act.predecessor
+                ? existingTasks.find(t => t.id === act.predecessor) ?? scheduledNewTasks.find(t => t.id === act.predecessor)
+                : undefined;
+
+            const startCandidate = predecessorTask ? new Date(predecessorTask.endDate) : new Date(defaultStart);
+            const startDate = Number.isNaN(startCandidate.getTime()) ? new Date(defaultStart) : startCandidate;
+            const endDate = new Date(startDate.getTime() + duration * HOUR_IN_MS);
+
+            const task = {
+                id: act.tempId,
+                project,
+                company,
+                activity: act.activity,
+                startDate: formatLocalDateTime(startDate),
+                endDate: formatLocalDateTime(endDate),
+                duration,
+                predecessor: act.predecessor || undefined,
+                isCompleted: act.isCompleted,
+                color: act.color
+            };
+
+            scheduledNewTasks.push(task);
+            return task;
+        });
+
         onSave(tasksToSave);
     };
 
@@ -111,10 +176,10 @@ export const TaskForm: React.FC<TaskFormProps> = ({ onSave, onCancel, projects, 
                     <input
                         type="text"
                         required
-                        readOnly={!!initialProject}
+                        readOnly={isProjectLocked}
                         value={project}
                         onChange={(e) => setProject(e.target.value)}
-                        className={`w-full h-11 px-4 rounded-xl border text-text-primary placeholder:text-text-muted focus:outline-none transition-all shadow-sm ${!!initialProject ? 'bg-surface-elevated cursor-not-allowed border-primary/20 font-bold text-primary' : 'bg-surface-dark border-border-subtle focus:border-primary/50'}`}
+                        className={`w-full h-11 px-4 rounded-xl border text-text-primary placeholder:text-text-muted focus:outline-none transition-all shadow-sm ${isProjectLocked ? 'bg-surface-elevated cursor-not-allowed border-primary/20 font-bold text-primary' : 'bg-surface-dark border-border-subtle focus:border-primary/50'}`}
                         placeholder="Nome do Projeto"
                         list="project-list"
                     />
@@ -191,40 +256,30 @@ export const TaskForm: React.FC<TaskFormProps> = ({ onSave, onCancel, projects, 
                             </div>
                         </div>
 
-                        {/* Previsão Início */}
-                        <div className="space-y-1.5 md:col-span-3">
-                            <label className="text-xs font-semibold text-text-secondary block">Início</label>
+                        {/* Duração */}
+                        <div className="space-y-1.5 md:col-span-4">
+                            <label className="text-xs font-semibold text-text-secondary block">Duração (horas)</label>
                             <div className="relative">
                                 <input
-                                    type="datetime-local"
+                                    type="number"
                                     required
-                                    value={act.startDate}
-                                    onChange={(e) => handleChangeActivity(act.tempId, 'startDate', e.target.value)}
-                                    className="w-full h-10 pl-9 pr-2 text-sm rounded-xl bg-surface-dark border border-border-subtle text-text-primary focus:outline-none focus:border-primary/50 transition-all shadow-sm [color-scheme:dark]"
+                                    min={1}
+                                    step={1}
+                                    value={act.duration}
+                                    onChange={(e) => handleChangeActivity(act.tempId, 'duration', sanitizeDuration(Number(e.target.value)))}
+                                    className="w-full h-10 pl-9 pr-3 text-sm rounded-xl bg-surface-dark border border-border-subtle text-text-primary focus:outline-none focus:border-primary/50 transition-all shadow-sm"
+                                    placeholder="Ex: 8"
                                 />
-                                <CalendarIcon size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
+                                <Clock size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
                             </div>
+                            <p className="text-[10px] text-text-muted mt-0.5">
+                                As datas serão definidas ao arrastar e conectar as barras no gráfico.
+                            </p>
                         </div>
 
-                        {/* Previsão Fim */}
-                        <div className="space-y-1.5 md:col-span-3">
-                            <label className="text-xs font-semibold text-text-secondary block">Fim</label>
-                            <div className="relative">
-                                <input
-                                    type="datetime-local"
-                                    required
-                                    value={act.endDate}
-                                    onChange={(e) => handleChangeActivity(act.tempId, 'endDate', e.target.value)}
-                                    min={act.startDate}
-                                    className="w-full h-10 pl-9 pr-2 text-sm rounded-xl bg-surface-dark border border-border-subtle text-text-primary focus:outline-none focus:border-primary/50 transition-all shadow-sm [color-scheme:dark]"
-                                />
-                                <CalendarIcon size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
-                            </div>
-                        </div>
-
-                        {/* Predecessora */}
-                        <div className="space-y-1.5 md:col-span-2">
-                            <label className="text-xs font-semibold text-text-secondary block">Predecessora</label>
+                        {/* Predecessora (opcional - também pode ser definida via drag) */}
+                        <div className="space-y-1.5 md:col-span-4">
+                            <label className="text-xs font-semibold text-text-secondary block">Predecessora <span className="text-text-muted font-normal">(opcional)</span></label>
                             <select
                                 value={act.predecessor}
                                 onChange={(e) => handleChangeActivity(act.tempId, 'predecessor', e.target.value)}
@@ -248,6 +303,9 @@ export const TaskForm: React.FC<TaskFormProps> = ({ onSave, onCancel, projects, 
                                     )
                                 ))}
                             </select>
+                            <p className="text-[10px] text-text-muted mt-0.5">
+                                Também pode ser definida arrastando uma barra sobre outra no gráfico.
+                            </p>
                         </div>
                         
                         {/* Cor Opcional */}

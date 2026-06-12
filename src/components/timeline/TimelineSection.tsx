@@ -9,19 +9,77 @@ interface TimelineSectionProps {
     onAddProject: () => void;
 }
 
-export const TimelineSection: React.FC<TimelineSectionProps> = ({ projects, onAddProject }) => {
-    const [tasks, setTasks] = useState<TimelineTask[]>(() => {
+const HOUR_IN_MS = 60 * 60 * 1000;
+
+const formatLocalDateTime = (date: Date) => {
+    const pad = (value: number) => value.toString().padStart(2, '0');
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+};
+
+const getDurationHours = (startDate: string, endDate: string) => {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const duration = Math.round((end.getTime() - start.getTime()) / HOUR_IN_MS);
+    return Number.isFinite(duration) ? Math.max(1, duration) : 8;
+};
+
+const normalizeTimelineTask = (task: Partial<TimelineTask>): TimelineTask => {
+    const startDate = task.startDate || formatLocalDateTime(new Date());
+    const endDate = task.endDate || startDate;
+
+    return {
+        id: task.id || crypto.randomUUID(),
+        project: task.project || '',
+        company: task.company || '',
+        activity: task.activity || '',
+        startDate,
+        endDate,
+        duration: task.duration || getDurationHours(startDate, endDate),
+        predecessor: task.predecessor,
+        isCompleted: !!task.isCompleted,
+        color: task.color,
+    };
+};
+
+const loadStoredTasks = () => {
+    try {
         const saved = localStorage.getItem('altbase_tasks');
-        const parsed = saved ? JSON.parse(saved) : [];
-        // Garantir que isCompleted exista para tarefas antigas
-        return parsed.map((t: any) => ({ ...t, isCompleted: !!t.isCompleted }));
-    });
+        const parsed: unknown = saved ? JSON.parse(saved) : [];
+        if (!Array.isArray(parsed)) return [];
+        return parsed
+            .filter((task): task is Partial<TimelineTask> => typeof task === 'object' && task !== null)
+            .map(normalizeTimelineTask);
+    } catch {
+        return [];
+    }
+};
+
+const wouldCreateDependencyCycle = (tasks: TimelineTask[], predecessorId: string, successorId: string) => {
+    if (predecessorId === successorId) return true;
+
+    const predecessorByTaskId = new Map(tasks.map(task => [task.id, task.predecessor]));
+    const visited = new Set<string>();
+    let currentId: string | undefined = predecessorId;
+
+    while (currentId) {
+        if (currentId === successorId) return true;
+        if (visited.has(currentId)) return true;
+        visited.add(currentId);
+        currentId = predecessorByTaskId.get(currentId);
+    }
+
+    return false;
+};
+
+export const TimelineSection: React.FC<TimelineSectionProps> = ({ projects, onAddProject }) => {
+    const [tasks, setTasks] = useState<TimelineTask[]>(loadStoredTasks);
     const [showForm, setShowForm] = useState(false);
     const [editingTask, setEditingTask] = useState<TimelineTask | undefined>(undefined);
     const [preFilled, setPreFilled] = useState<{ project: string, company: string } | undefined>(undefined);
     const [isExporting, setIsExporting] = useState(false);
     const [markerOffset, setMarkerOffset] = useState(100);
     const [savedScroll, setSavedScroll] = useState({ left: 0, top: 0 });
+    const [leftColumnWidth, setLeftColumnWidth] = useState(280);
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [viewMode, setViewMode] = useState<'hours' | 'days' | 'weeks' | 'months'>('hours');
     const [savedScrollY, setSavedScrollY] = useState<{ windowY: number, containerY: number } | null>(null);
@@ -115,27 +173,23 @@ export const TimelineSection: React.FC<TimelineSectionProps> = ({ projects, onAd
         setTasks(prev => {
             const predTask = prev.find(t => t.id === predecessorId);
             const succTask = prev.find(t => t.id === successorId);
-            
-            if (!predTask || !succTask) return prev;
+
+            if (!predTask || !succTask || wouldCreateDependencyCycle(prev, predecessorId, successorId)) return prev;
 
             const predEnd = new Date(predTask.endDate);
             const succStart = new Date(succTask.startDate);
             const succEnd = new Date(succTask.endDate);
-            const duration = succEnd.getTime() - succStart.getTime();
 
-            // Successor starts right after predecessor ends
+            const durationMs = succTask.duration
+                ? succTask.duration * 60 * 60 * 1000
+                : succEnd.getTime() - succStart.getTime();
+
             const newStart = predEnd;
-            const newEnd = new Date(newStart.getTime() + duration);
-
-            // Format as ISO string for datetime-local inputs
-            const formatDate = (d: Date) => {
-                const pad = (n: number) => n.toString().padStart(2, '0');
-                return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-            };
+            const newEnd = new Date(newStart.getTime() + durationMs);
 
             const nextTasks = prev.map(t =>
-                t.id === successorId 
-                    ? { ...t, predecessor: predecessorId, startDate: formatDate(newStart), endDate: formatDate(newEnd) } 
+                t.id === successorId
+                    ? { ...t, predecessor: predecessorId, startDate: formatLocalDateTime(newStart), endDate: formatLocalDateTime(newEnd) }
                     : t
             );
             localStorage.setItem('altbase_tasks', JSON.stringify(nextTasks));
@@ -359,6 +413,8 @@ export const TimelineSection: React.FC<TimelineSectionProps> = ({ projects, onAd
                     scrollLeft={savedScroll.left}
                     scrollTop={savedScroll.top}
                     onScrollChange={(left, top) => setSavedScroll({ left, top })}
+                    leftColumnWidth={leftColumnWidth}
+                    onLeftColumnWidthChange={setLeftColumnWidth}
                 />
             )}
         </div>
