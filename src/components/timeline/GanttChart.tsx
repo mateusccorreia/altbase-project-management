@@ -19,6 +19,8 @@ interface GanttChartProps {
     onReorderTasks: (tasks: TimelineTask[]) => void;
     onLinkTasks: (predecessorId: string, successorId: string) => void;
     viewMode: 'hours' | 'days' | 'weeks' | 'months';
+    leftColumnWidth: number;
+    onLeftColumnWidthChange: (width: number) => void;
 }
 
 export const GanttChart: React.FC<GanttChartProps> = ({ 
@@ -35,10 +37,11 @@ export const GanttChart: React.FC<GanttChartProps> = ({
     onMarkerOffsetChange,
     scrollLeft,
     scrollTop,
-    onScrollChange
+    onScrollChange,
+    leftColumnWidth,
+    onLeftColumnWidthChange
 }) => {
     const CELL_WIDTH = viewMode === 'hours' ? 30 : viewMode === 'days' ? 6 : viewMode === 'weeks' ? 1.2 : 0.25;
-    const [leftColumnWidth, setLeftColumnWidth] = useState(280);
     const isResizing = useRef(false);
     const isDraggingMarker = useRef(false);
     const isPanning = useRef(false);
@@ -52,6 +55,7 @@ export const GanttChart: React.FC<GanttChartProps> = ({
     const [linkingFrom, setLinkingFrom] = useState<string | null>(null);
     const [linkMousePos, setLinkMousePos] = useState<{ x: number; y: number } | null>(null);
     const timelineBodyRef = useRef<HTMLDivElement>(null);
+    const scrollTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const handleDragRowStart = (e: React.DragEvent, taskId: string) => {
         setDraggedRowId(taskId);
@@ -67,7 +71,7 @@ export const GanttChart: React.FC<GanttChartProps> = ({
         }
     };
 
-    const handleDragRowLeave = (e: React.DragEvent) => {
+    const handleDragRowLeave = () => {
         setDragOverRowId(null);
     };
 
@@ -124,8 +128,8 @@ export const GanttChart: React.FC<GanttChartProps> = ({
         const allStarts = tasks.map(t => parseISO(t.startDate));
         const allEnds = tasks.map(t => parseISO(t.endDate));
 
-        let earliest = startOfDay(min(allStarts));
-        let latest = endOfDay(max(allEnds));
+        const earliest = startOfDay(min(allStarts));
+        const latest = endOfDay(max(allEnds));
 
         const totalHours = differenceInHours(latest, earliest) + 1;
         const generatedHours = Array.from({ length: totalHours }, (_, i) => addHours(earliest, i));
@@ -190,7 +194,7 @@ export const GanttChart: React.FC<GanttChartProps> = ({
                     currentRow++;
                     const isCollapsed = collapsedProjects.has(projectName);
                     if (!isCollapsed) {
-                        for (const _ of projectTasks) {
+                        for (let index = 0; index < projectTasks.length; index++) {
                             if (currentRow === row) return y + TASK_ROW_HEIGHT / 2;
                             y += TASK_ROW_HEIGHT;
                             currentRow++;
@@ -288,7 +292,7 @@ export const GanttChart: React.FC<GanttChartProps> = ({
             const minWidth = 150;
             const maxWidth = 600;
             const newWidth = e.clientX - containerRect.left;
-            setLeftColumnWidth(Math.max(minWidth, Math.min(maxWidth, newWidth)));
+            onLeftColumnWidthChange(Math.max(minWidth, Math.min(maxWidth, newWidth)));
         }
 
         if (isDraggingMarker.current) {
@@ -312,7 +316,7 @@ export const GanttChart: React.FC<GanttChartProps> = ({
                 y: e.clientY - bodyRect.top + (timelineBodyRef.current.parentElement?.scrollTop || 0),
             });
         }
-    }, [onMarkerOffsetChange, stopAllDragging, linkingFrom]);
+    }, [onLeftColumnWidthChange, onMarkerOffsetChange, stopAllDragging, linkingFrom]);
 
     useEffect(() => {
         window.addEventListener('mousemove', handleMouseMove);
@@ -323,6 +327,11 @@ export const GanttChart: React.FC<GanttChartProps> = ({
         };
     }, [handleMouseMove, stopAllDragging]);
 
+    const markerTime = useMemo(() => {
+        const totalMinutes = (markerOffset / CELL_WIDTH) * 60;
+        return addMinutes(minDate, totalMinutes);
+    }, [markerOffset, minDate, CELL_WIDTH]);
+
     if (!tasks.length) {
         return (
             <div className="flex items-center justify-center h-48 border border-dashed border-border-subtle rounded-2xl bg-surface-card/50">
@@ -331,13 +340,7 @@ export const GanttChart: React.FC<GanttChartProps> = ({
         );
     }
 
-    const labelInterval = 2; 
-    
-    // Calcular data atual do marcador
-    const markerTime = useMemo(() => {
-        const totalMinutes = (markerOffset / CELL_WIDTH) * 60;
-        return addMinutes(minDate, totalMinutes);
-    }, [markerOffset, minDate]);
+    const labelInterval = 2;
 
     const colors = [
         'bg-amp-orange',
@@ -353,8 +356,6 @@ export const GanttChart: React.FC<GanttChartProps> = ({
             onDeleteTask(taskId);
         }
     };
-
-    const scrollTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
         const sl = e.currentTarget.scrollLeft;
@@ -616,8 +617,8 @@ export const GanttChart: React.FC<GanttChartProps> = ({
                                             const startOffsetHours = differenceInMinutes(tStart, minDate) / 60;
                                             const durationHours = differenceInMinutes(tEnd, tStart) / 60;
                                             
-                                            let left = startOffsetHours * CELL_WIDTH;
-                                            let width = Math.max(durationHours * CELL_WIDTH, 4);
+                                            const left = startOffsetHours * CELL_WIDTH;
+                                            const width = Math.max(durationHours * CELL_WIDTH, 4);
 
                                             const baseColorClass = task.color || colors[idx % colors.length];
                                             
