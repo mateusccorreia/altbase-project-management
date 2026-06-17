@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, X, Save, Trash2, CheckCircle2, Circle, Clock } from 'lucide-react';
+import { Plus, X, Save, Trash2, CheckCircle2, Circle, Clock, Calendar } from 'lucide-react';
 import type { TimelineTask } from '../../types';
 
 interface TaskFormProps {
@@ -15,6 +15,8 @@ interface TaskFormProps {
 interface ActivityEntry {
     tempId: string;
     activity: string;
+    startDate: string;
+    endDate: string;
     duration: number;
     predecessor: string;
     isCompleted: boolean;
@@ -53,6 +55,26 @@ const sanitizeDuration = (value: number) => {
     return Math.max(1, Math.round(value));
 };
 
+const getEndDateFromDuration = (startDate: string, duration: number) => {
+    const start = new Date(startDate);
+    if (Number.isNaN(start.getTime())) return '';
+    return formatLocalDateTime(new Date(start.getTime() + sanitizeDuration(duration) * HOUR_IN_MS));
+};
+
+const createActivityEntry = (startDate?: string): ActivityEntry => {
+    const start = startDate || formatLocalDateTime(getRoundedCurrentHour());
+    return {
+        tempId: crypto.randomUUID(),
+        activity: '',
+        startDate: start,
+        endDate: getEndDateFromDuration(start, DEFAULT_DURATION_HOURS),
+        duration: DEFAULT_DURATION_HOURS,
+        predecessor: '',
+        isCompleted: false,
+        color: undefined
+    };
+};
+
 export const TaskForm: React.FC<TaskFormProps> = ({ onSave, onCancel, projects, existingTasks, taskToEdit, initialProject, initialCompany }) => {
     const [project, setProject] = useState(taskToEdit?.project || initialProject || '');
     const [company, setCompany] = useState(taskToEdit?.company || initialCompany || '');
@@ -64,17 +86,19 @@ export const TaskForm: React.FC<TaskFormProps> = ({ onSave, onCancel, projects, 
             return [{
                 tempId: taskToEdit.id,
                 activity: taskToEdit.activity,
+                startDate: taskToEdit.startDate,
+                endDate: getEndDateFromDuration(taskToEdit.startDate, durationHours),
                 duration: durationHours,
                 predecessor: taskToEdit.predecessor || '',
                 isCompleted: taskToEdit.isCompleted || false,
                 color: taskToEdit.color
             }];
         }
-        return [{ tempId: crypto.randomUUID(), activity: '', duration: DEFAULT_DURATION_HOURS, predecessor: '', isCompleted: false, color: undefined }];
+        return [createActivityEntry()];
     });
 
     const handleAddActivity = () => {
-        setActivities([...activities, { tempId: crypto.randomUUID(), activity: '', duration: DEFAULT_DURATION_HOURS, predecessor: '', isCompleted: false, color: undefined }]);
+        setActivities([...activities, createActivityEntry(activities.at(-1)?.endDate)]);
     };
 
     const handleRemoveActivity = (id: string) => {
@@ -87,6 +111,42 @@ export const TaskForm: React.FC<TaskFormProps> = ({ onSave, onCancel, projects, 
         setActivities(activities.map(a => a.tempId === id ? { ...a, [field]: value } : a));
     };
 
+    const handleChangeStartDate = (id: string, startDate: string) => {
+        setActivities(activities.map(a =>
+            a.tempId === id
+                ? { ...a, startDate, endDate: getEndDateFromDuration(startDate, a.duration) }
+                : a
+        ));
+    };
+
+    const handleChangeDuration = (id: string, durationValue: number) => {
+        const duration = sanitizeDuration(durationValue);
+        setActivities(activities.map(a =>
+            a.tempId === id
+                ? { ...a, duration, endDate: getEndDateFromDuration(a.startDate, duration) }
+                : a
+        ));
+    };
+
+    const handleChangePredecessor = (id: string, predecessor: string) => {
+        setActivities(currentActivities => currentActivities.map(a => {
+            if (a.tempId !== id) return a;
+
+            const predecessorEndDate = predecessor
+                ? existingTasks.find(t => t.id === predecessor)?.endDate || currentActivities.find(t => t.tempId === predecessor)?.endDate
+                : undefined;
+
+            if (!predecessorEndDate) return { ...a, predecessor };
+
+            return {
+                ...a,
+                predecessor,
+                startDate: predecessorEndDate,
+                endDate: getEndDateFromDuration(predecessorEndDate, a.duration)
+            };
+        }));
+    };
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -96,31 +156,14 @@ export const TaskForm: React.FC<TaskFormProps> = ({ onSave, onCancel, projects, 
         const tasksToSave: TimelineTask[] = activities.map(act => {
             const duration = sanitizeDuration(act.duration);
 
-            if (taskToEdit) {
-                const existingTask = existingTasks.find(t => t.id === act.tempId);
-                if (existingTask) {
-                    const start = new Date(existingTask.startDate);
-                    const end = new Date(start.getTime() + duration * HOUR_IN_MS);
-                    return {
-                        id: act.tempId,
-                        project,
-                        company,
-                        activity: act.activity,
-                        startDate: existingTask.startDate,
-                        endDate: formatLocalDateTime(end),
-                        duration,
-                        predecessor: act.predecessor || undefined,
-                        isCompleted: act.isCompleted,
-                        color: act.color
-                    };
-                }
-            }
-
             const predecessorTask = act.predecessor
                 ? existingTasks.find(t => t.id === act.predecessor) ?? scheduledNewTasks.find(t => t.id === act.predecessor)
                 : undefined;
 
-            const startCandidate = predecessorTask ? new Date(predecessorTask.endDate) : new Date(defaultStart);
+            const requestedStart = new Date(act.startDate);
+            const startCandidate = Number.isNaN(requestedStart.getTime())
+                ? predecessorTask ? new Date(predecessorTask.endDate) : new Date(defaultStart)
+                : requestedStart;
             const startDate = Number.isNaN(startCandidate.getTime()) ? new Date(defaultStart) : startCandidate;
             const endDate = new Date(startDate.getTime() + duration * HOUR_IN_MS);
 
@@ -256,8 +299,23 @@ export const TaskForm: React.FC<TaskFormProps> = ({ onSave, onCancel, projects, 
                             </div>
                         </div>
 
+                        {/* Data inicial */}
+                        <div className="space-y-1.5 md:col-span-3">
+                            <label className="text-xs font-semibold text-text-secondary block">Data e hora inicial</label>
+                            <div className="relative">
+                                <input
+                                    type="datetime-local"
+                                    required
+                                    value={act.startDate}
+                                    onChange={(e) => handleChangeStartDate(act.tempId, e.target.value)}
+                                    className="w-full h-10 pl-9 pr-3 text-sm rounded-xl bg-surface-dark border border-border-subtle text-text-primary focus:outline-none focus:border-primary/50 transition-all shadow-sm"
+                                />
+                                <Calendar size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
+                            </div>
+                        </div>
+
                         {/* Duração */}
-                        <div className="space-y-1.5 md:col-span-4">
+                        <div className="space-y-1.5 md:col-span-2">
                             <label className="text-xs font-semibold text-text-secondary block">Duração (horas)</label>
                             <div className="relative">
                                 <input
@@ -266,23 +324,40 @@ export const TaskForm: React.FC<TaskFormProps> = ({ onSave, onCancel, projects, 
                                     min={1}
                                     step={1}
                                     value={act.duration}
-                                    onChange={(e) => handleChangeActivity(act.tempId, 'duration', sanitizeDuration(Number(e.target.value)))}
+                                    onChange={(e) => handleChangeDuration(act.tempId, Number(e.target.value))}
                                     className="w-full h-10 pl-9 pr-3 text-sm rounded-xl bg-surface-dark border border-border-subtle text-text-primary focus:outline-none focus:border-primary/50 transition-all shadow-sm"
                                     placeholder="Ex: 8"
                                 />
                                 <Clock size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
                             </div>
                             <p className="text-[10px] text-text-muted mt-0.5">
-                                As datas serão definidas ao arrastar e conectar as barras no gráfico.
+                                Atualiza a data final automaticamente.
+                            </p>
+                        </div>
+
+                        {/* Data final */}
+                        <div className="space-y-1.5 md:col-span-3">
+                            <label className="text-xs font-semibold text-text-secondary block">Data e hora final</label>
+                            <div className="relative">
+                                <input
+                                    type="datetime-local"
+                                    readOnly
+                                    value={act.endDate}
+                                    className="w-full h-10 pl-9 pr-3 text-sm rounded-xl bg-surface-elevated border border-border-subtle text-text-primary focus:outline-none transition-all shadow-sm"
+                                />
+                                <Calendar size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
+                            </div>
+                            <p className="text-[10px] text-text-muted mt-0.5">
+                                Calculada pela data inicial e duração.
                             </p>
                         </div>
 
                         {/* Predecessora (opcional - também pode ser definida via drag) */}
-                        <div className="space-y-1.5 md:col-span-4">
+                        <div className="space-y-1.5 md:col-span-6">
                             <label className="text-xs font-semibold text-text-secondary block">Predecessora <span className="text-text-muted font-normal">(opcional)</span></label>
                             <select
                                 value={act.predecessor}
-                                onChange={(e) => handleChangeActivity(act.tempId, 'predecessor', e.target.value)}
+                                onChange={(e) => handleChangePredecessor(act.tempId, e.target.value)}
                                 className="w-full h-10 px-3 rounded-xl bg-surface-dark border border-border-subtle text-text-primary text-sm focus:outline-none focus:border-primary/50 transition-all shadow-sm"
                             >
                                 <option value="">Nenhuma</option>
